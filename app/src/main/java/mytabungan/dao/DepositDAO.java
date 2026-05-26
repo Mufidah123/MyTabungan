@@ -1,7 +1,7 @@
 package mytabungan.dao;
 
 public class DepositDAO {
-    // (nama)
+    // (Faiz)
     // mengelola riwayat setor uang
     // 1. simpan ke tabel deposits
     // 2. update tabungan_utama.saved_amount
