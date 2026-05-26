@@ -4,6 +4,10 @@
 # Log file
 *.log
 
+# Java build output
+bin/
+app/bin/
+
 # BlueJ files
 *.ctxt
 
