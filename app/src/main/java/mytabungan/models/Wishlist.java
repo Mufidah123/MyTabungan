@@ -1,5 +1,7 @@
 package mytabungan.models;
 
+import java.time.LocalDateTime;
+
 public class Wishlist extends Saving {
     private String title;
     private double maxLimit;
@@ -14,7 +16,7 @@ public class Wishlist extends Saving {
                     double maxLimit,
                     String status,
                     String period,
-                    String createdAt) {
+                    LocalDateTime createdAt) {
 
         super(id, userId, targetAmount, savedAmount, createdAt);
 
@@ -39,5 +41,13 @@ public class Wishlist extends Saving {
     public String getPeriod() {
         return period;
     }
-    
+
+    public double calculateMonthlyLimit(MonthlySaving monthlySaving) {
+        return monthlySaving.getTargetAmount() * (maxLimit / 100);
+    }
+
+    @Override
+    public boolean isReached() {
+        return getSavedAmount() >= getTargetAmount();
+    }
 }

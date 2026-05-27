@@ -26,10 +26,10 @@ public class LoginScene {
 
     public static Scene getLogin(Stage stage) {
 
-        // Left Side
+        // === Left Side ===
         VBox leftSide = AuthLayout.buildPanel();
 
-        // Right Side
+        // === Right Side ===
         VBox rightSide = buildFormPanel(stage);
 
         // === Root Layout ===

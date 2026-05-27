@@ -1,13 +1,15 @@
 package mytabungan.models;
 
-public class Saving {
-    protected int id;
-    protected int userId;
+import java.time.LocalDateTime;
+
+public abstract class Saving {
+    private int id;
+    private int userId;
     protected double targetAmount;
     protected double savedAmount;
-    protected String createdAt;
+    protected LocalDateTime createdAt;
     
-    public Saving(int id, int userId, double targetAmount, double savedAmount, String createdAt) {
+    public Saving(int id, int userId, double targetAmount, double savedAmount, LocalDateTime createdAt) {
         this.id = id;
         this.userId = userId;
         this.targetAmount = targetAmount;
@@ -26,12 +28,13 @@ public class Saving {
     public double getTargetAmount() {
         return targetAmount;
     }
-
     public double getSavedAmount() {
         return savedAmount;
     }
 
-    public String getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
+
+    public abstract boolean isReached();
 }
