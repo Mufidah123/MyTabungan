@@ -228,7 +228,7 @@ public class RegisterScene {
             message.setText("Processing registration...");
             message.setStyle("-fx-text-fill: #888; -fx-font-size: 12px;");
 
-            User user = new User(email, username, password);
+            User user = new User(username, email, password);
             boolean success = new UserDAO().register(user);
             if (success) {
                 message.setText("Registrasi berhasil! Silakan login.");

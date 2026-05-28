@@ -25,7 +25,7 @@ public class UserDAO {
         return false;
     }
 
-    public boolean login(String usernameOrEmail, String password){
+    public User login(String usernameOrEmail, String password){
         String sql = "SELECT * FROM users WHERE username = ? OR email = ?";
         try (Connection conn = DatabaseConfig.connect();
         PreparedStatement ps = conn.prepareStatement(sql)){
@@ -35,12 +35,21 @@ public class UserDAO {
             ResultSet result = ps.executeQuery();
             if (result.next()) {
                 String hashedPassword = result.getString("password");
-                return PasswordUtil.checkPassword(password, hashedPassword);
+                boolean isMatch = PasswordUtil.checkPassword(password, hashedPassword);
+
+                if (isMatch) {
+                    return new User(
+                        result.getInt("id"),
+                        result.getString("username"),
+                        result.getString("email"),
+                        result.getString("password")
+                    );
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return false;
+        return null;
     }
 
     public boolean isEmailExists(String email){

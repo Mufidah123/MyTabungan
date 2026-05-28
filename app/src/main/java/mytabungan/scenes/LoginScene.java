@@ -1,5 +1,6 @@
 package mytabungan.scenes;
 
+import javafx.animation.PauseTransition;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -13,7 +14,10 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import mytabungan.dao.UserDAO;
+import mytabungan.models.User;
+import mytabungan.utils.SessionManager;
 import mytabungan.utils.ValidationUtil;
 
 public class LoginScene {
@@ -181,13 +185,19 @@ public class LoginScene {
             }
             message.setText("Processing login...");
             message.setStyle("-fx-text-fill: #888; -fx-font-size: 12px;");
-            boolean success = new UserDAO().login(user, password);
+            User loggedInUser = new UserDAO().login(user, password);
             
-            if (success) {
+            if (loggedInUser != null) {
+                SessionManager.login(loggedInUser);
                 message.setText("Login berhasil!");
                 message.setStyle("-fx-text-fill: #74C365; -fx-font-weight: bold; -fx-font-size: 12px;");
-                // DashboardScene dashboard = new DashboardScene(stage);
-                // stage.setScene(dashboard.getScene());
+                
+                MainScene utama = new MainScene();
+                PauseTransition delay = new PauseTransition(Duration.seconds(2));
+                delay.setOnFinished(event -> {
+                    stage.setScene(utama.getMain(stage));
+                });
+                delay.play();
             } else {
                 message.setText("Username / email atau password salah!");
                 message.setStyle("-fx-text-fill: #CC0000; -fx-font-size: 12px;");

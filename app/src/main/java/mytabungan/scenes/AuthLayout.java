@@ -19,7 +19,7 @@ public class AuthLayout {
         panel.setPrefWidth(460);
         panel.setMinWidth(460);
         panel.setMaxWidth(Double.MAX_VALUE);
-        panel.setStyle("-fx-background-color: #001F3F; -fx-padding: 50 40 50 40;");
+        panel.setStyle("-fx-background-color: #001F3F; -fx-padding: 50 40 50 40; -fx-background-radius: 0 24 24 0;");
 
         var logoApp = LoginScene.class.getResourceAsStream("/images/tabunginAja.png");
         if (logoApp == null) {
