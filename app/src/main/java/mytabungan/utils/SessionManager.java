@@ -3,7 +3,6 @@ package mytabungan.utils;
 import mytabungan.models.User;
 
 public class SessionManager {
-
     private static User currentUser;
 
     // User yang sekarang sedang aktif

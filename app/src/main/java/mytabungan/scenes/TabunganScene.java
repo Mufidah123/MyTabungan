@@ -9,6 +9,8 @@ public class TabunganScene {
     public static VBox buildPage() {
         String username = SessionManager.getCurrentUser().getUsername();
 
+        //
+        // Teks Hello
         Label helloLabel = new Label("Hello, ");
         Label usernameLabel = new Label(username + "!");
         helloLabel.setStyle("-fx-fill: #001F3F;");
