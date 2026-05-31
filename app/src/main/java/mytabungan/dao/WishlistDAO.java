@@ -31,3 +31,145 @@ public class WishlistDAO {
         }
         return list;
     }
+
+    //  Ambil satu wishlist terbaru (dipakai TabunganScene) 
+    public Wishlist getWishlistByUserId(int userId) {
+        String sql = "SELECT * FROM wishlists WHERE user_id = ? AND status = 'ONGOING' ORDER BY created_at DESC LIMIT 1";
+
+        try (Connection conn = DatabaseConfig.connect();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return mapRow(rs);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    //  Buat wishlist baru, kembalikan id yang di-generate 
+    public int createWishlist(Wishlist wishlist) {
+        String sql = "INSERT INTO wishlists (user_id, title, target_price, saved_amount, max_limit, status, period) "
+                   + "VALUES (?, ?, ?, 0, ?, 'ONGOING', ?)";
+
+        try (Connection conn = DatabaseConfig.connect();
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            ps.setInt(1, wishlist.getUserId());
+            ps.setString(2, wishlist.getTitle());
+            ps.setDouble(3, wishlist.getTargetAmount());
+            ps.setDouble(4, wishlist.getMaxLimit());
+            ps.setString(5, wishlist.getPeriod());
+
+            int affected = ps.executeUpdate();
+            if (affected > 0) {
+                ResultSet keys = ps.getGeneratedKeys();
+                if (keys.next()) {
+                    return keys.getInt(1);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    //  Tambah uang ke saved_amount wishlist tertentu 
+    public boolean addToWishlist(int wishlistId, double amount) {
+        String sql = "UPDATE wishlists SET saved_amount = saved_amount + ? WHERE id = ?";
+
+        try (Connection conn = DatabaseConfig.connect();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setDouble(1, amount);
+            ps.setInt(2, wishlistId);
+            boolean ok = ps.executeUpdate() > 0;
+
+            if (ok) {
+                checkAndMarkReached(conn, wishlistId);
+            }
+            return ok;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    //  Cek setelah deposit: kalau sudah tercapai, ubah status jadi REACHED 
+    private void checkAndMarkReached(Connection conn, int wishlistId) {
+        String checkSql = "SELECT saved_amount, target_price FROM wishlists WHERE id = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(checkSql)) {
+            ps.setInt(1, wishlistId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                double saved  = rs.getDouble("saved_amount");
+                double target = rs.getDouble("target_price");
+
+                if (saved >= target) {
+                    String updateSql = "UPDATE wishlists SET status = 'REACHED' WHERE id = ?";
+                    try (PreparedStatement upd = conn.prepareStatement(updateSql)) {
+                        upd.setInt(1, wishlistId);
+                        upd.executeUpdate();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    //  Hapus / batalkan wishlist 
+    public boolean deleteWishlist(int wishlistId) {
+        String sql = "UPDATE wishlists SET status = 'CANCELLED' WHERE id = ?";
+
+        try (Connection conn = DatabaseConfig.connect();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, wishlistId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    //  Hitung total persen alokasi dari semua wishlist ONGOING milik user 
+    public double getTotalMaxLimitByUserId(int userId) {
+        String sql = "SELECT SUM(max_limit) FROM wishlists WHERE user_id = ? AND status = 'ONGOING'";
+
+        try (Connection conn = DatabaseConfig.connect();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getDouble(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    //  Helper: mapping ResultSet  Wishlist 
+    private Wishlist mapRow(ResultSet rs) throws Exception {
+        return new Wishlist(
+            rs.getInt("id"),
+            rs.getInt("user_id"),
+            rs.getString("title"),
+            rs.getDouble("target_price"),
+            rs.getDouble("saved_amount"),
+            rs.getDouble("max_limit"),
+            rs.getString("status"),
+            rs.getString("period"),
+            rs.getTimestamp("created_at").toLocalDateTime()
+        );
+    }
+}
