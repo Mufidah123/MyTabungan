@@ -32,12 +32,21 @@ public class MonthlySaving extends Saving {
         return savedAmount - allocationAmount;
     }
 
+    @Override
+    public double getRemaining() {
+        return Math.max(0,
+            getTargetAmount() - getSavedAmount()
+        );
+    }
+
     // Persentase (opsional)
     public double getProgressPercentage() {
         if (targetAmount == 0) {
             return 0;
         }
-        return (savedAmount / targetAmount) * 100;
+        return Math.min( 100,
+            (savedAmount / targetAmount) * 100
+        );
     }
 }
 

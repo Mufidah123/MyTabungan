@@ -44,12 +44,29 @@ public class DepositDAO {
                     rs.getString("saving_type"),
                     rs.getInt("reference_id"),
                     rs.getDouble("amount"),
-                    rs.getTimestamp("created_at").toString()
+                    rs.getTimestamp("created_at").toLocalDateTime()
                 ));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return deposits;
+    }
+
+    public double getTotalDepositByUser(int userId) {
+        String sql = "SELECT SUM(amount) FROM deposits WHERE user_id = ?";
+
+        try (Connection conn = DatabaseConfig.connect();
+        PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getDouble(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 }

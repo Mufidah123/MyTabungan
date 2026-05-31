@@ -43,7 +43,13 @@ public class Wishlist extends Saving {
     }
 
     public double calculateMonthlyLimit(MonthlySaving monthlySaving) {
-        return monthlySaving.getTargetAmount() * (maxLimit / 100);
+        double percentage = Math.min(maxLimit, 50);
+        return monthlySaving.getTargetAmount() * (percentage / 100);
+    }
+
+    @Override
+    public double getRemaining() {
+        return Math.max(0, getTargetAmount() - getSavedAmount());
     }
 
     @Override

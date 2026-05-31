@@ -40,14 +40,16 @@ public class Sidebar {
         Button tabunganButton = createMenuButton("/images/iconmytabungan.png", "My Tabungan");
         Button wishlistButton = createMenuButton("/images/icon wishlist.png", "WishlistKu");
         Button growthButton   = createMenuButton("/images/icon growth.png",   "Growth");
+        Button[] navButtons = { tabunganButton, wishlistButton, growthButton };
 
         VBox menuBox = new VBox(8, tabunganButton, wishlistButton, growthButton);
         menuBox.setStyle("-fx-padding: 10 16 10 16;");
 
+        setActive(tabunganButton, navButtons);
         root.setCenter(TabunganScene.buildPage());
-        tabunganButton.setOnAction(e -> root.setCenter(TabunganScene.buildPage()));
-        wishlistButton.setOnAction(e -> root.setCenter(WishlistScene.buildPage()));
-        growthButton.setOnAction(e -> root.setCenter(GrowthScene.buildPage()));
+        tabunganButton.setOnAction(e -> { setActive(tabunganButton, navButtons); root.setCenter(TabunganScene.buildPage());});
+        wishlistButton.setOnAction(e -> {setActive(wishlistButton, navButtons); root.setCenter(WishlistScene.buildPage());});
+        growthButton.setOnAction(e -> { setActive(growthButton, navButtons); root.setCenter(GrowthScene.buildPage());});
 
         // Spacer
         Region spacer = new Region();
@@ -55,13 +57,6 @@ public class Sidebar {
 
         // logout
         Button logoutButton = createLogoutButton("/images/logout icon.png", "Logout");
-        logoutButton.setOnAction(e -> {
-            SessionManager.logout();
-            stage.setScene(LoginScene.getLogin(stage));
-        });
-
-        VBox logoutBox = new VBox(logoutButton);
-        logoutBox.setStyle("-fx-padding: 10 16 20 16;");
         logoutButton.setOnAction(e -> {
             Alert confirmLogout = new Alert(Alert.AlertType.CONFIRMATION);
 
@@ -87,92 +82,93 @@ public class Sidebar {
             });
         });
 
+        VBox logoutBox = new VBox(logoutButton);
+        logoutBox.setStyle("-fx-padding: 10 16 20 16;");
+
         sidebar.getChildren().addAll(
             logoBox,
             menuBox,
             spacer,
             logoutBox
         );
-
         return sidebar;
+    }
+
+    private static void setActive(Button active, Button[] allButtons) {
+        for (Button btn : allButtons) {
+            boolean isActive = btn == active;
+            String bg        = isActive ? SPRING_DARKER   : FIRST_OF_SPRING;
+            String textColor = isActive ? MIDNIGHT_MIRAGE : MIDNIGHT_MIRAGE;
+
+            String style = buildMenuStyle(bg, textColor);
+            btn.setStyle(style);
+            
+            if (btn.getGraphic() instanceof HBox hbox) {
+                hbox.getChildren().stream()
+                    .filter(n -> n instanceof Label)
+                    .map(n -> (Label) n)
+                    .findFirst()
+                    .ifPresent(lbl -> lbl.setStyle(
+                        "-fx-font-size: 14px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: " + textColor + ";"
+                    ));
+            }
+
+            if (!isActive) {
+                btn.setOnMouseEntered(ev -> btn.setStyle(buildMenuStyle(SPRING_DARK,    MIDNIGHT_MIRAGE)));
+                btn.setOnMousePressed(ev -> btn.setStyle(buildMenuStyle(SPRING_DARKER,  MIDNIGHT_MIRAGE)));
+                btn.setOnMouseReleased(ev-> btn.setStyle(buildMenuStyle(SPRING_DARK,    MIDNIGHT_MIRAGE)));
+                btn.setOnMouseExited(ev  -> btn.setStyle(buildMenuStyle(FIRST_OF_SPRING,    MIDNIGHT_MIRAGE)));
+            } else {
+                btn.setOnMouseEntered(null);
+                btn.setOnMousePressed(null);
+                btn.setOnMouseReleased(null);
+                btn.setOnMouseExited(null);
+            }
+        }
+    }
+
+    private static String buildMenuStyle(String bg, String textColor) {
+        return "-fx-background-color: " + bg + ";" +
+                "-fx-text-fill: " + textColor + ";" +
+                "-fx-font-size: 14px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-alignment: CENTER_LEFT;" +
+                "-fx-padding: 12 16;" +
+                "-fx-cursor: hand;" +
+                "-fx-background-radius: 10;" +
+                "-fx-border-radius: 10;";
     }
 
     // Logo
     private static VBox buildLogoBox() {
-        var logoFile = Sidebar.class.getResourceAsStream("/images/logo.png");
+        var logoFile = Sidebar.class.getResourceAsStream("/images/tabunginAja.png");
 
         if (logoFile == null) {
-            throw new RuntimeException("Logo tidak ditemukan! Pastikan ada di src/main/resources/images/logo.png");
+            throw new RuntimeException("Logo tidak ditemukan! Pastikan ada di src/main/resources/images");
         }
 
         ImageView logo = new ImageView(new Image(logoFile));
-        logo.setFitWidth(140);
+        logo.setFitWidth(160);
         logo.setPreserveRatio(true);
 
         VBox logoBox = new VBox(logo);
-        logoBox.setStyle("-fx-padding: 36 0 24 20;");
+        logoBox.setStyle("-fx-padding: 36 0 24 22;");
         return logoBox;
     }
 
     // Menu
     private static Button createMenuButton(String iconPath, String text) {
-        String baseStyle =
-            "-fx-background-color: " + FIRST_OF_SPRING + ";" +
-            "-fx-text-fill: " + MIDNIGHT_MIRAGE + ";" +
-            "-fx-font-size: 14px;" +
-            "-fx-font-weight: bold;" +
-            "-fx-alignment: CENTER_LEFT;" +
-            "-fx-padding: 12 16;" +
-            "-fx-cursor: hand;" +
-            "-fx-background-radius: 10;" +
-            "-fx-border-radius: 10;";
-            // "-fx-border-text-gap: 8;";
-
-        ImageView iconView = loadIcon(iconPath);
-        StackPane iconWrapper = new StackPane(iconView);
-        iconWrapper.setMinWidth(24);
-        iconWrapper.setMaxWidth(24);
-        iconWrapper.setPrefWidth(24);
-        iconWrapper.setAlignment(Pos.CENTER_LEFT);
-        // iconWrapper.setStyle("-fx-border-color: red; -fx-border-width: 1;");
-
-        Label textLabel = new Label(text);
-        textLabel.setStyle(
-            "-fx-font-size: 14px;" +
-            "-fx-font-weight: bold;" +
-            "-fx-text-fill: " + MIDNIGHT_MIRAGE + ";"
-        );
-
-        HBox content = new HBox(4, iconWrapper, textLabel);
-        content.setAlignment(Pos.CENTER_LEFT);
-        content.setStyle("-fx-padding: 0 0 0 4;");
-
-        Button button = new Button();
-        button.setMaxWidth(Double.MAX_VALUE);
-        button.setStyle(baseStyle);
-        button.setGraphic(content);
-        button.setContentDisplay(javafx.scene.control.ContentDisplay.LEFT);
-
-        button.setOnMouseEntered(e  -> button.setStyle(baseStyle.replace(FIRST_OF_SPRING, SPRING_DARK)));
-        button.setOnMousePressed(e  -> button.setStyle(baseStyle.replace(FIRST_OF_SPRING, SPRING_DARKER)));
-        button.setOnMouseReleased(e -> button.setStyle(baseStyle.replace(FIRST_OF_SPRING, SPRING_DARK)));
-        button.setOnMouseExited(e   -> button.setStyle(baseStyle));
-
-        return button;
+        return buildButton(iconPath, text);
     }
 
     private static Button createLogoutButton(String iconPath, String text) {
-        String baseStyle =
-            "-fx-background-color: " + FIRST_OF_SPRING + ";" +
-            "-fx-text-fill: " + MIDNIGHT_MIRAGE + ";" +
-            "-fx-font-size: 14px;" +
-            "-fx-font-weight: bold;" +
-            "-fx-alignment: CENTER_LEFT;" +
-            "-fx-padding: 12 16;" +
-            "-fx-cursor: hand;" +
-            "-fx-background-radius: 10;" +
-            "-fx-border-radius: 10;";
-            // "-fx-graphic-text-gap: 8;";
+        return buildButton(iconPath, text);
+    }
+
+    private static Button buildButton(String iconPath, String text) {
+        String baseStyle = buildMenuStyle(FIRST_OF_SPRING, MIDNIGHT_MIRAGE);
 
         ImageView iconView = loadIcon(iconPath);
         StackPane iconWrapper = new StackPane(iconView);
@@ -180,7 +176,6 @@ public class Sidebar {
         iconWrapper.setMaxWidth(24);
         iconWrapper.setPrefWidth(24);
         iconWrapper.setAlignment(Pos.CENTER_LEFT);
-        // iconWrapper.setStyle("-fx-border-color: red; -fx-border-width: 1;");
 
         Label textLabel = new Label(text);
         textLabel.setStyle(
@@ -194,19 +189,18 @@ public class Sidebar {
         content.setStyle("-fx-padding: 0 0 0 4;");
 
         Button button = new Button();
-        button.setGraphic(content);
         button.setMaxWidth(Double.MAX_VALUE);
         button.setStyle(baseStyle);
+        button.setGraphic(content);
         button.setContentDisplay(javafx.scene.control.ContentDisplay.LEFT);
 
-        button.setOnMouseEntered(e  -> button.setStyle(baseStyle.replace(FIRST_OF_SPRING, SPRING_DARK)));
-        button.setOnMousePressed(e  -> button.setStyle(baseStyle.replace(FIRST_OF_SPRING, SPRING_DARKER)));
-        button.setOnMouseReleased(e -> button.setStyle(baseStyle.replace(FIRST_OF_SPRING, SPRING_DARK)));
+        button.setOnMouseEntered(e  -> button.setStyle(buildMenuStyle(SPRING_DARK,   MIDNIGHT_MIRAGE)));
+        button.setOnMousePressed(e  -> button.setStyle(buildMenuStyle(SPRING_DARKER, MIDNIGHT_MIRAGE)));
+        button.setOnMouseReleased(e -> button.setStyle(buildMenuStyle(SPRING_DARK,   MIDNIGHT_MIRAGE)));
         button.setOnMouseExited(e   -> button.setStyle(baseStyle));
 
         return button;
     }
-
     
     private static ImageView loadIcon(String path) {
         var file = Sidebar.class.getResourceAsStream(path);
@@ -222,11 +216,9 @@ public class Sidebar {
             iconView.setFitWidth(20);
             iconView.setFitHeight(20);
             iconView.setPreserveRatio(false);
-            System.out.println("⚠️ Icon tidak ditemukan: " + path);
+            System.out.println("Icon tidak ditemukan: " + path);
         }
         
         return iconView;
     }
 }
-
-

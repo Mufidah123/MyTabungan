@@ -53,7 +53,7 @@ public class SavingDAO {
     }
 
     public boolean updateSavingAmount(int savingId, double amount) {
-        String sql = "UPDATE tabungan_utama SET saved_amount =saved_amount + ? WHERE id = ?";
+        String sql = "UPDATE tabungan_utama SET saved_amount = saved_amount + ? WHERE id = ?";
 
         try (Connection conn = DatabaseConfig.connect();
         PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -67,8 +67,22 @@ public class SavingDAO {
         return false;
     }
 
-    public boolean resetTabungan(int savingId, String newPeriodMonth) {
+    public boolean updateTargetAmount(int savingId, double newTarget) {
+        String sql = "UPDATE tabungan_utama SET target_amount = ? WHERE id = ?";
 
+        try (Connection conn = DatabaseConfig.connect();
+        PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDouble(1, newTarget);
+            ps.setInt(2, savingId);
+
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean resetTabungan(int savingId, String newPeriodMonth) {
         String sql = "UPDATE tabungan_utama SET saved_amount = 0, period_month = ? WHERE id = ?";
         try (Connection conn = DatabaseConfig.connect();
         PreparedStatement ps = conn.prepareStatement(sql)) {

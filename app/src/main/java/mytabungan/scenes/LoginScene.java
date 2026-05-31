@@ -1,6 +1,7 @@
 package mytabungan.scenes;
 
 import javafx.animation.PauseTransition;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -15,7 +16,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import mytabungan.dao.SavingDAO;
 import mytabungan.dao.UserDAO;
+import mytabungan.models.MonthlySaving;
 import mytabungan.models.User;
 import mytabungan.utils.SessionManager;
 import mytabungan.utils.ValidationUtil;
@@ -193,9 +196,22 @@ public class LoginScene {
                 message.setStyle("-fx-text-fill: #74C365; -fx-font-weight: bold; -fx-font-size: 12px;");
                 
                 MainScene utama = new MainScene();
-                PauseTransition delay = new PauseTransition(Duration.seconds(2));
+                PauseTransition delay = new PauseTransition(Duration.seconds(1.5));
                 delay.setOnFinished(event -> {
                     stage.setScene(utama.getMain(stage));
+                    Platform.runLater(() -> {
+                        SavingDAO savingDAO = new SavingDAO();
+                        MonthlySaving saving = savingDAO.getSavingByUserId(loggedInUser.getId());
+                        
+                        if (saving == null) {
+                            MonthlySaving created = TabunganScene.showCreateSavingDialog(
+                                loggedInUser.getId(), savingDAO
+                            );
+                            if (created != null) {
+                                MainScene.refresh();
+                            }
+                        }
+                    });
                 });
                 delay.play();
             } else {

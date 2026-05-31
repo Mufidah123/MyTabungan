@@ -1,14 +1,16 @@
 package mytabungan.models;
 
+import java.time.LocalDateTime;
+
 public class Deposit {
     private int id;
     private int userId;
     private String savingType;
     private int referenceId;
     private double amount;
-    private String createdAt;
+    private LocalDateTime createdAt;
 
-    public Deposit(int id, int userId, String savingType, int referenceId, double amount, String createdAt) {
+    public Deposit(int id, int userId, String savingType, int referenceId, double amount, LocalDateTime createdAt) {
         this.id = id;
         this.userId = userId;
         this.savingType = savingType;
@@ -37,7 +39,7 @@ public class Deposit {
         return amount;
     }
 
-    public String getCreatedAt(){
+    public LocalDateTime getCreatedAt(){
         return createdAt;
     }
 }

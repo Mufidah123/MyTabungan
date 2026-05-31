@@ -21,6 +21,10 @@ public abstract class Saving {
         return id;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public int getUserId() {
         return userId;
     }
@@ -37,4 +41,6 @@ public abstract class Saving {
     }
 
     public abstract boolean isReached();
+
+    abstract double getRemaining();
 }
